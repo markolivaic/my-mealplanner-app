@@ -1,0 +1,39 @@
+
+/* Layout styles */
+
+/* Container */
+.container {
+    width: 100%;
+    max-width: $container-width;
+    margin: 0 auto;
+    padding: 0 1rem;
+    
+    @media (max-width: 768px) {
+      padding: 0 1.5rem;
+    }
+  }
+  
+  /* Empty state styling */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 0;
+    
+    p {
+      font-size: 1.1rem;
+      color: $text-color-light;
+      margin-bottom: 1.5rem;
+    }
+  }
+  
+  /* User profile link in header */
+  .user-profile-link {
+    display: flex;
+    align-items: center;
+    color: $text-color;
+    font-weight: 500;
+    margin-right: 1rem;
+    
+    &:hover {
+      color: $primary-color;
+    }
+  }
