@@ -1,45 +1,20 @@
+// pages/Admin.jsx
+import { useRecipes } from '../context/RecipeContext';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const Admin = () => {
-  // Staticki podaci o jelima, kasnije će biti zamijenjeni API pozivom
-  const [pendingRecipes, setPendingRecipes] = useState([
-    {
-      id: 7,
-      title: 'Homemade Lasagna',
-      image: '/public/lovable-uploads/8519731c-0794-4bc3-8014-be929a3a90b1.png',
-      submittedBy: 'John Smith',
-      submittedOn: '2023-09-15',
-      category: 'Dinner'
-    },
-    {
-      id: 8,
-      title: 'Green Smoothie Bowl',
-      image: '/public/lovable-uploads/20ce8b6a-a0c9-47bc-94fc-d7ff3f26ea30.png',
-      submittedBy: 'Emily Johnson',
-      submittedOn: '2023-09-18',
-      category: 'Breakfast'
-    },
-    {
-      id: 9,
-      title: 'Spicy Chicken Curry',
-      image: '/public/lovable-uploads/2e60d0f2-4564-4a7a-af0e-b48117cd8b6d.png',
-      submittedBy: 'Michael Lee',
-      submittedOn: '2023-09-20',
-      category: 'Dinner'
-    }
-  ]);
+  const { recipes, approveRecipe, rejectRecipe } = useRecipes();
+  const [pendingRecipes, setPendingRecipes] = useState(recipes.filter(r => !r.approved));
 
   const handleApprove = (id) => {
-    // Staticno zasad, posli cemo zvaniti API za odobrenje recepta
-    setPendingRecipes(pendingRecipes.filter(recipe => recipe.id !== id));
-    alert(`Recipe with ID ${id} approved successfully!`);
+    approveRecipe(id);
+    setPendingRecipes(prev => prev.filter(r => r.id !== id));
   };
 
   const handleReject = (id) => {
-    // Staticno zasad, posli cemo zvaniti API za odbijanje recepta
-    setPendingRecipes(pendingRecipes.filter(recipe => recipe.id !== id));
-    alert(`Recipe with ID ${id} rejected.`);
+    rejectRecipe(id);
+    setPendingRecipes(prev => prev.filter(r => r.id !== id));
   };
 
   return (
@@ -65,8 +40,8 @@ const Admin = () => {
                   <div className="admin-card-content">
                     <h3>{recipe.title}</h3>
                     <div className="admin-meta">
-                      <p>By: {recipe.submittedBy}</p>
-                      <p>Submitted: {new Date(recipe.submittedOn).toLocaleDateString()}</p>
+                      <p>By: {recipe.createdBy}</p>
+                      <p>Submitted: Just now</p>
                     </div>
                     <div className="admin-actions">
                       <Link to={`/recipes/${recipe.id}`} className="btn btn-secondary">Preview</Link>
@@ -82,28 +57,6 @@ const Admin = () => {
               <p>No recipes pending approval.</p>
             </div>
           )}
-        </section>
-
-        <section className="admin-section">
-          <h2>Site Statistics</h2>
-          <div className="admin-stats">
-            <div className="stat-card">
-              <div className="stat-value">125</div>
-              <div className="stat-label">Total Recipes</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">42</div>
-              <div className="stat-label">Registered Users</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">18</div>
-              <div className="stat-label">New Users This Month</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">5.2k</div>
-              <div className="stat-label">Monthly Visits</div>
-            </div>
-          </div>
         </section>
       </div>
     </>

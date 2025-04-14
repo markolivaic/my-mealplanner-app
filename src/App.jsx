@@ -10,6 +10,8 @@ import Profile from './pages/Profile';
 import Admin from './pages/Admin';
 import LoginRegister from './pages/LoginRegister';
 import NotFound from './pages/NotFound';
+import PrivateRoute from './components/PrivateRoute';
+import EditRecipe from './pages/EditRecipe';
 
 const App = () => {
   return (
@@ -18,11 +20,12 @@ const App = () => {
         <Route index element={<Home />} />
         <Route path="/recipes" element={<Recipes />} />
         <Route path="recipes/:id" element={<RecipeDetail />} />
-        <Route path="/add-recipe" element={<AddRecipe />} />
-        <Route path="meal-plan" element={<MealPlan />} />
-        <Route path="my-recipes" element={<MyRecipes />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="admin" element={<Admin />} />
+        <Route path="/add-recipe" element={<PrivateRoute><AddRecipe /></PrivateRoute>} />
+        <Route path="meal-plan" element={<PrivateRoute><MealPlan /></PrivateRoute>} />
+        <Route path="my-recipes" element={<PrivateRoute><MyRecipes /></PrivateRoute>} />
+        <Route path="edit-recipe/:id" element={<EditRecipe />} />
+        <Route path="profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+        <Route path="admin" element={<PrivateRoute adminOnly={true}><Admin /></PrivateRoute>} />
         <Route path="login" element={<LoginRegister formType="login" />} />
         <Route path="register" element={<LoginRegister formType="register" />} />
         <Route path="*" element={<NotFound />} />

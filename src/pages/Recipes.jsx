@@ -1,80 +1,19 @@
+// pages/Recipes.jsx
 import { useState } from 'react';
 import RecipeCard from '../components/RecipeCard';
+import { useRecipes } from '../context/RecipeContext';
 
 const Recipes = () => {
+  const { recipes } = useRecipes();
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('');
   const [sort, setSort] = useState('newest');
 
-  // Staticki podaci o receptima, kasnije će biti zamijenjeni API pozivom
-  const allRecipes = [
-    {
-      id: 1,
-      title: 'Fresh Vegetable Salad',
-      description: 'A delightful mix of seasonal vegetables with a zesty dressing.',
-      image: 'my-mealplanner-app/public/images/pexels-ella-olsson-572949-1640775.png',
-      tag: 'Vegetarian',
-      calories: 320,
-      prepTime: 15,
-      category: 'Lunch'
-    },
-    {
-      id: 2,
-      title: 'Grilled Salmon with Herbs',
-      description: 'Perfectly grilled salmon fillet with fresh herbs and lemon.',
-      image: 'my-mealplanner-app/public/images/pexels-ella-olsson-572949-1640775.png',
-      tag: 'Seafood',
-      calories: 450,
-      prepTime: 25,
-      category: 'Dinner'
-    },
-    {
-      id: 3,
-      title: 'Energizing Quinoa Bowl',
-      description: 'Nutrient-rich quinoa with roasted vegetables and tahini sauce.',
-      image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-      tag: 'Vegan',
-      calories: 380,
-      prepTime: 20,
-      category: 'Lunch'
-    },
-    {
-      id: 4,
-      title: 'Pasta Primavera',
-      description: 'Colorful pasta with fresh spring vegetables and light cream sauce.',
-      image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-      tag: 'Dinner',
-      calories: 520,
-      prepTime: 35,
-      category: 'Dinner'
-    },
-    {
-      id: 5,
-      title: 'Avocado Toast with Eggs',
-      description: 'Wholesome breakfast with smashed avocado, poached eggs, and microgreens.',
-      image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-      tag: 'Breakfast',
-      calories: 350,
-      prepTime: 20,
-      category: 'Breakfast'
-    },
-    {
-      id: 6,
-      title: 'Mixed Berry Smoothie',
-      description: 'Refreshing smoothie made with mixed berries, banana, and Greek yogurt.',
-      image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-      tag: 'Snack',
-      calories: 210,
-      prepTime: 10,
-      category: 'Breakfast'
-    }
-  ];
-
-
-  const filteredRecipes = allRecipes
+  const filteredRecipes = recipes
+    .filter(recipe => recipe.approved)
     .filter(recipe => {
       const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           recipe.description.toLowerCase().includes(searchTerm.toLowerCase());
+                            recipe.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = category ? recipe.category === category : true;
       return matchesSearch && matchesCategory;
     })
@@ -109,24 +48,17 @@ const Recipes = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button type="submit"><i className="fa-solid fa-magnifying-glass"></i></button>
           </div>
-          
-          <select 
-            value={category} 
-            onChange={(e) => setCategory(e.target.value)}
-          >
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">All Categories</option>
             <option value="Breakfast">Breakfast</option>
             <option value="Lunch">Lunch</option>
             <option value="Dinner">Dinner</option>
             <option value="Snack">Snack</option>
+            <option value="Dessert">Dessert</option>
           </select>
-          
-          <select 
-            value={sort} 
-            onChange={(e) => setSort(e.target.value)}
-          >
+          <select value={sort} onChange={(e) => setSort(e.target.value)}>
             <option value="newest">Newest</option>
             <option value="calories-asc">Calories (Low to High)</option>
             <option value="calories-desc">Calories (High to Low)</option>
@@ -146,13 +78,6 @@ const Recipes = () => {
             <p>No recipes found. Try adjusting your search criteria.</p>
           </div>
         )}
-
-        <div className="pagination">
-          <a href="#" className="page-item active">1</a>
-          <a href="#" className="page-item">2</a>
-          <a href="#" className="page-item">3</a>
-          <a href="#" className="page-item">Next</a>
-        </div>
       </div>
     </>
   );

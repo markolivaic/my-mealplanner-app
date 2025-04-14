@@ -1,56 +1,9 @@
 import { useState } from 'react';
+import mealPlanData from '../data/mealplan';
 
 const MealPlan = () => {
-  const [currentWeek, setCurrentWeek] = useState('June 12 - June 18, 2023');
-  
-  // Staticki podaci o jelima, kasnije će biti zamijenjeni API pozivom
-  const mealPlanData = [
-    // Staticki podaci o jelima u tjednu, kasnije će biti zamijenjeni API pozivom
-    {
-      breakfast: { name: 'Oatmeal', image: 'public/images/pexels-ella-olsson-572949-1640775.png', calories: 320 },
-      lunch: { name: 'Greek Salad', image: 'public/images/pexels-ella-olsson-572949-1640775.png', calories: 380 },
-      dinner: { name: 'Whole Wheat Pasta', image: 'public/images/pexels-ella-olsson-572949-1640775.png', calories: 480 },
-      dailyTotal: 1180
-    },
-    {
-      breakfast: { name: 'Banana Oatmeal', image: 'public/images/pexels-ella-olsson-572949-1640775.png', calories: 350 },
-      lunch: null,
-      dinner: null,
-      dailyTotal: 350
-    },
-    {
-      breakfast: null,
-      lunch: { name: 'Turkey Sandwich', image: 'public/images/pexels-ella-olsson-572949-1640775.png', calories: 420 },
-      dinner: null,
-      dailyTotal: 420
-    },
-    {
-      breakfast: null,
-      lunch: null,
-      dinner: { name: 'Baked Salmon', image: 'public/images/pexels-ella-olsson-572949-1640775.png', calories: 520 },
-      dailyTotal: 520
-    },
-    {
-      breakfast: { name: 'Berry Smoothie', image: 'public/images/pexels-ella-olsson-572949-1640775.png', calories: 290 },
-      lunch: { name: 'Vegetable Soup', image: 'public/images/pexels-ella-olsson-572949-1640775.png', calories: 250 },
-      dinner: null,
-      dailyTotal: 540
-    },
-    {
-      breakfast: null,
-      lunch: null,
-      dinner: null,
-      dailyTotal: 0
-    },
-    {
-      breakfast: null,
-      lunch: null,
-      dinner: null,
-      dailyTotal: 0
-    }
-  ];
+  const [currentWeek, setCurrentWeek] = useState('June 12 - June 18, 2025');
 
-  // Weekly statistics
   const weeklyStats = {
     totalCalories: mealPlanData.reduce((sum, day) => sum + day.dailyTotal, 0),
     dailyAverage: Math.round(mealPlanData.reduce((sum, day) => sum + day.dailyTotal, 0) / 7),
@@ -64,20 +17,11 @@ const MealPlan = () => {
 
   const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-
-  const previousWeek = () => {
-    setCurrentWeek('June 5 - June 11, 2025');
-    // U pravoj aplikaciji, ovo bi povuklo podatke za prethodni tjedan
-  };
-
-  const nextWeek = () => {
-    setCurrentWeek('June 19 - June 25, 2025');
-    // U pravoj aplikaciji, ovo bi povuklo podatke za sljedeći tjedan
-  };
+  const previousWeek = () => setCurrentWeek('June 5 - June 11, 2025');
+  const nextWeek = () => setCurrentWeek('June 19 - June 25, 2025');
 
   const handleAddMeal = (day, mealType) => {
     console.log(`Adding ${mealType} for ${weekdays[day]}`);
-    // U pravoj aplikaciji, ovo bi otvorilo modal za dodavanje jela
   };
 
   return (
@@ -108,64 +52,28 @@ const MealPlan = () => {
             <div key={index} className="grid-header">{day}</div>
           ))}
 
-          {/* Breakfast Row */}
-          <div className="grid-header time-label">Breakfast</div>
-          {mealPlanData.map((day, index) => (
-            <div key={`breakfast-${index}`} className="meal-cell">
-              {day.breakfast ? (
-                <div className="meal-content">
-                  <img src={day.breakfast.image} alt={day.breakfast.name} className="meal-image" />
-                  <div className="meal-name">{day.breakfast.name}</div>
-                  <div className="meal-calories">{day.breakfast.calories} cal</div>
+          {['breakfast', 'lunch', 'dinner'].map(mealType => (
+            <>
+              <div className="grid-header time-label">{mealType.charAt(0).toUpperCase() + mealType.slice(1)}</div>
+              {mealPlanData.map((day, index) => (
+                <div key={`${mealType}-${index}`} className="meal-cell">
+                  {day[mealType] ? (
+                    <div className="meal-content">
+                      <img src={day[mealType].image} alt={day[mealType].name} className="meal-image" />
+                      <div className="meal-name">{day[mealType].name}</div>
+                      <div className="meal-calories">{day[mealType].calories} cal</div>
+                    </div>
+                  ) : (
+                    <div className="add-meal" onClick={() => handleAddMeal(index, mealType)}>
+                      <span className="add-icon">+</span>
+                      <span>Add {mealType.charAt(0).toUpperCase() + mealType.slice(1)}</span>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="add-meal" onClick={() => handleAddMeal(index, 'breakfast')}>
-                  <span className="add-icon">+</span>
-                  <span>Add Breakfast</span>
-                </div>
-              )}
-            </div>
+              ))}
+            </>
           ))}
 
-          {/* Lunch Row */}
-          <div className="grid-header time-label">Lunch</div>
-          {mealPlanData.map((day, index) => (
-            <div key={`lunch-${index}`} className="meal-cell">
-              {day.lunch ? (
-                <div className="meal-content">
-                  <img src={day.lunch.image} alt={day.lunch.name} className="meal-image" />
-                  <div className="meal-name">{day.lunch.name}</div>
-                  <div className="meal-calories">{day.lunch.calories} cal</div>
-                </div>
-              ) : (
-                <div className="add-meal" onClick={() => handleAddMeal(index, 'lunch')}>
-                  <span className="add-icon">+</span>
-                  <span>Add Lunch</span>
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* Dinner Row */}
-          <div className="grid-header time-label">Dinner</div>
-          {mealPlanData.map((day, index) => (
-            <div key={`dinner-${index}`} className="meal-cell">
-              {day.dinner ? (
-                <div className="meal-content">
-                  <img src={day.dinner.image} alt={day.dinner.name} className="meal-image" />
-                  <div className="meal-name">{day.dinner.name}</div>
-                  <div className="meal-calories">{day.dinner.calories} cal</div>
-                </div>
-              ) : (
-                <div className="add-meal" onClick={() => handleAddMeal(index, 'dinner')}>
-                  <span className="add-icon">+</span>
-                  <span>Add Dinner</span>
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* Daily Totals */}
           <div className="grid-header time-label">Daily Total</div>
           {mealPlanData.map((day, index) => (
             <div key={`total-${index}`} className="grid-header daily-total">

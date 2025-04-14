@@ -1,40 +1,14 @@
-import { useState } from 'react';
+// pages/MyRecipes.jsx
+import { useAuth } from '../context/AuthContext';
+import { useRecipes } from '../context/RecipeContext';
 import { Link } from 'react-router-dom';
 import { Badge } from '../components/Badge';
 
 const MyRecipes = () => {
-  const [userRecipes, setUserRecipes] = useState([
-    {
-      id: 1,
-      title: 'Fresh Vegetable Salad',
-      image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-      date: '2025-06-01',
-      status: 'approved',
-      category: 'Lunch'
-    },
-    {
-      id: 2,
-      title: 'Grilled Salmon with Herbs',
-      image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-      date: '2025-06-10',
-      status: 'approved',
-      category: 'Dinner'
-    },
-    {
-      id: 3,
-      title: 'Chocolate Chip Cookies',
-      image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-      date: '2025-09-22',
-      status: 'pending',
-      category: 'Dessert'
-    }
-  ]);
+  const { user } = useAuth();
+  const { recipes, deleteRecipe } = useRecipes();
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this recipe?')) {
-      setUserRecipes(userRecipes.filter(recipe => recipe.id !== id));
-    }
-  };
+  const userRecipes = recipes.filter(recipe => recipe.createdBy === user.name);
 
   return (
     <>
@@ -60,14 +34,14 @@ const MyRecipes = () => {
                 </div>
                 <div className="recipe-content">
                   <h3>{recipe.title}</h3>
-                  <p>Added on {new Date(recipe.date).toLocaleDateString()}</p>
+                  <p>Added by you</p>
                   <div className="recipe-status">
-                    <Badge status={recipe.status} />
+                    <Badge status={recipe.approved ? 'approved' : 'pending'} />
                   </div>
                   <div className="recipe-actions">
                     <Link to={`/recipes/${recipe.id}`} className="btn btn-secondary">View</Link>
                     <Link to={`/edit-recipe/${recipe.id}`} className="btn btn-secondary">Edit</Link>
-                    <button onClick={() => handleDelete(recipe.id)} className="btn btn-secondary">Delete</button>
+                    <button onClick={() => deleteRecipe(recipe.id)} className="btn btn-secondary">Delete</button>
                   </div>
                 </div>
               </div>

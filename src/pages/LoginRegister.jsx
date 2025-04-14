@@ -1,31 +1,62 @@
+// pages/LoginRegister.jsx
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import users from '../data/users';
+import { toast } from 'react-toastify';
 
 const LoginRegister = ({ formType = 'login' }) => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
     rememberMe: false,
-    agreeTerms: false
+    agreeTerms: false,
   });
+
+  const isLogin = formType === 'login';
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // In a real app, would handle authentication here
+    if (isLogin) {
+      const foundUser = users.find(
+        user => user.email === formData.email && user.password === formData.password
+      );
+      if (foundUser) {
+        login({
+          isLoggedIn: true,
+          isAdmin: foundUser.isAdmin,
+          name: foundUser.fullName
+        });
+        toast.success('Login successful!');
+        navigate('/');
+      } else {
+        toast.error('Invalid email or password');
+      }
+    } else {
+      if (formData.password !== formData.confirmPassword) {
+        toast.error('Passwords do not match');
+        return;
+      }
+      const newUser = {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        isAdmin: false
+      };
+      users.push(newUser);
+      toast.success('Registration successful! You can now log in.');
+      navigate('/login');
+    }
   };
-
-  const isLogin = formType === 'login';
 
   return (
     <div className="container auth-page">

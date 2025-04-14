@@ -1,38 +1,10 @@
 import { Link } from 'react-router-dom';
 import RecipeCard from '../components/RecipeCard';
 import FeatureCard from '../components/FeatureCard';
+import recipes from '../data/recipes';
 
 const Home = () => {
-  // Staticki podaci o jelima, kasnije će biti zamijenjeni API pozivom
-  const featuredRecipes = [
-    {
-      id: 1,
-      title: 'Fresh Vegetable Salad',
-      description: 'A delightful mix of seasonal vegetables with a zesty dressing.',
-      image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-      tag: 'Vegetarian',
-      calories: 320,
-      prepTime: 15
-    },
-    {
-      id: 2,
-      title: 'Grilled Salmon with Herbs',
-      description: 'Perfectly grilled salmon fillet with fresh herbs and lemon.',
-      image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-      tag: 'Seafood',
-      calories: 450,
-      prepTime: 25
-    },
-    {
-      id: 3,
-      title: 'Energizing Quinoa Bowl',
-      description: 'Nutrient-rich quinoa with roasted vegetables and tahini sauce.',
-      image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-      tag: 'Vegan',
-      calories: 380,
-      prepTime: 20
-    }
-  ];
+  const featuredRecipes = recipes.slice(0, 3);
 
   // Features
   const features = [
