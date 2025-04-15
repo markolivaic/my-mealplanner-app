@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRecipes } from '../context/RecipeContext';
 import { useAuth } from '../context/AuthContext';
-import { toast } from 'react-toastify';
 
 const AddRecipe = () => {
+  const navigate = useNavigate();
   const { addRecipe } = useRecipes();
-  const { user } = useAuth();
+  const { user: currentUser } = useAuth();
 
   const [recipeData, setRecipeData] = useState({
     title: '',
@@ -15,18 +16,22 @@ const AddRecipe = () => {
     prepTime: '',
     ingredients: '',
     instructions: '',
-    image: null
+    image: '',
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setRecipeData(prev => ({ ...prev, [name]: value }));
+    setRecipeData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setRecipeData(prev => ({ ...prev, image: file.name })); // Save filename or simulate URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setRecipeData((prev) => ({ ...prev, image: reader.result }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -34,14 +39,17 @@ const AddRecipe = () => {
     e.preventDefault();
     const newRecipe = {
       ...recipeData,
-      createdBy: user.name,
-      image: recipeData.image || '/images/pexels-ella-olsson-572949-1640775.png'
+      calories: Number(recipeData.calories),
+      prepTime: Number(recipeData.prepTime),
+      ingredients: recipeData.ingredients.split('\n'),
+      instructions: recipeData.instructions.split('\n'),
+      createdBy: currentUser?.name || 'Guest',
+      status: 'pending'
     };
+
     addRecipe(newRecipe);
-    toast.success('Recipe submitted successfully and awaiting approval!');
-    setRecipeData({
-      title: '', description: '', category: '', calories: '', prepTime: '', ingredients: '', instructions: '', image: null
-    });
+    alert('Recipe submitted successfully!');
+    navigate('/my-recipes');
   };
 
   const handleReset = () => {
@@ -53,7 +61,7 @@ const AddRecipe = () => {
       prepTime: '',
       ingredients: '',
       instructions: '',
-      image: null
+      image: '',
     });
   };
 
@@ -71,7 +79,7 @@ const AddRecipe = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="title">Recipe Title</label>
-              <input 
+              <input
                 type="text"
                 id="title"
                 name="title"
@@ -84,7 +92,7 @@ const AddRecipe = () => {
 
             <div className="form-group">
               <label htmlFor="description">Description</label>
-              <textarea 
+              <textarea
                 id="description"
                 name="description"
                 value={recipeData.description}
@@ -97,7 +105,7 @@ const AddRecipe = () => {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="category">Category</label>
-                <select 
+                <select
                   id="category"
                   name="category"
                   value={recipeData.category}
@@ -115,7 +123,7 @@ const AddRecipe = () => {
 
               <div className="form-group">
                 <label htmlFor="calories">Calories</label>
-                <input 
+                <input
                   type="number"
                   id="calories"
                   name="calories"
@@ -128,7 +136,7 @@ const AddRecipe = () => {
 
               <div className="form-group">
                 <label htmlFor="prepTime">Preparation Time (min)</label>
-                <input 
+                <input
                   type="number"
                   id="prepTime"
                   name="prepTime"
@@ -142,7 +150,7 @@ const AddRecipe = () => {
 
             <div className="form-group">
               <label htmlFor="ingredients">Ingredients</label>
-              <textarea 
+              <textarea
                 id="ingredients"
                 name="ingredients"
                 value={recipeData.ingredients}
@@ -155,7 +163,7 @@ const AddRecipe = () => {
 
             <div className="form-group">
               <label htmlFor="instructions">Cooking Instructions</label>
-              <textarea 
+              <textarea
                 id="instructions"
                 name="instructions"
                 value={recipeData.instructions}
@@ -167,7 +175,7 @@ const AddRecipe = () => {
 
             <div className="form-group">
               <label htmlFor="image">Recipe Image</label>
-              <input 
+              <input
                 type="file"
                 id="image"
                 name="image"

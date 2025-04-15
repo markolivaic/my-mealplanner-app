@@ -1,14 +1,19 @@
-// pages/MyRecipes.jsx
 import { useAuth } from '../context/AuthContext';
 import { useRecipes } from '../context/RecipeContext';
 import { Link } from 'react-router-dom';
 import { Badge } from '../components/Badge';
+import { toast } from 'react-toastify';
 
 const MyRecipes = () => {
   const { user } = useAuth();
   const { recipes, deleteRecipe } = useRecipes();
 
   const userRecipes = recipes.filter(recipe => recipe.createdBy === user.name);
+
+  const handleDelete = (id) => {
+    deleteRecipe(id);
+    toast.success('Recipe deleted successfully');
+  };
 
   return (
     <>
@@ -41,7 +46,7 @@ const MyRecipes = () => {
                   <div className="recipe-actions">
                     <Link to={`/recipes/${recipe.id}`} className="btn btn-secondary">View</Link>
                     <Link to={`/edit-recipe/${recipe.id}`} className="btn btn-secondary">Edit</Link>
-                    <button onClick={() => deleteRecipe(recipe.id)} className="btn btn-secondary">Delete</button>
+                    <button onClick={() => handleDelete(recipe.id)} className="btn btn-secondary">Delete</button>
                   </div>
                 </div>
               </div>

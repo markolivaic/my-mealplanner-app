@@ -1,17 +1,30 @@
+// pages/Profile.jsx
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 const Profile = () => {
-
-  // Staticki podaci o korisniku, kasnije će biti zamijenjeni API pozivom
-  const [user, setUser] = useState({
-    name: 'Jane Doe',
-    email: 'jane.doe@example.com',
-    image: 'public/images/pexels-ella-olsson-572949-1640775.png',
-    isAdmin: true
-  });
-
+  const { user, updateProfile } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
+  const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email);
+  const [image, setImage] = useState(user.image || '');
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImage(reader.result);
+      updateProfile({ image: reader.result });
+    };
+    if (file) reader.readAsDataURL(file);
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    updateProfile({ name, email });
+    alert('Profile updated');
+  };
 
   return (
     <>
@@ -36,7 +49,7 @@ const Profile = () => {
           >
             Preferences
           </button>
-          {user.isAdmin && (
+          {user.isLoggedIn && user.isAdmin && (
             <Link to="/admin" className="btn btn-secondary">
               Go to Admin Dashboard
             </Link>
@@ -47,27 +60,29 @@ const Profile = () => {
           <div className="form-container">
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
               <img 
-                src={user.image} 
-                alt={user.name} 
+                src={image || '/default-avatar.png'} 
+                alt={name} 
                 style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover' }}
               />
               <div style={{ marginLeft: '1.5rem' }}>
-                <h2>{user.name}</h2>
-                <p>{user.email}</p>
-                <button className="btn btn-secondary" style={{ marginTop: '0.5rem' }}>
+                <h2>{name}</h2>
+                <p>{email}</p>
+                <label className="btn btn-secondary" style={{ marginTop: '0.5rem' }}>
                   Change Photo
-                </button>
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
+                </label>
               </div>
             </div>
 
-            <form>
+            <form onSubmit={handleSave}>
               <div className="form-group">
                 <label htmlFor="name">Full Name</label>
                 <input 
                   type="text" 
                   id="name" 
                   name="name" 
-                  defaultValue={user.name} 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
 
@@ -77,7 +92,8 @@ const Profile = () => {
                   type="email" 
                   id="email" 
                   name="email" 
-                  defaultValue={user.email} 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
@@ -85,29 +101,15 @@ const Profile = () => {
                 <h3>Change Password</h3>
                 <div className="form-group">
                   <label htmlFor="currentPassword">Current Password</label>
-                  <input 
-                    type="password" 
-                    id="currentPassword" 
-                    name="currentPassword" 
-                  />
+                  <input type="password" id="currentPassword" name="currentPassword" />
                 </div>
-
                 <div className="form-group">
                   <label htmlFor="newPassword">New Password</label>
-                  <input 
-                    type="password" 
-                    id="newPassword" 
-                    name="newPassword" 
-                  />
+                  <input type="password" id="newPassword" name="newPassword" />
                 </div>
-
                 <div className="form-group">
                   <label htmlFor="confirmPassword">Confirm New Password</label>
-                  <input 
-                    type="password" 
-                    id="confirmPassword" 
-                    name="confirmPassword"
-                  />
+                  <input type="password" id="confirmPassword" name="confirmPassword" />
                 </div>
               </div>
 

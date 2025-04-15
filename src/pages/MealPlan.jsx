@@ -1,27 +1,68 @@
-import { useState } from 'react';
-import mealPlanData from '../data/mealplan';
+// pages/MealPlan.jsx
+import { useEffect, useState } from 'react';
+import { useRecipes } from '../context/RecipeContext';
+import { useAuth } from '../context/AuthContext';
+
+const getInitialPlan = () => {
+  const stored = localStorage.getItem('mealPlan');
+  if (stored) return JSON.parse(stored);
+  return Array(7).fill(null).map(() => ({ breakfast: null, lunch: null, dinner: null, dailyTotal: 0 }));
+};
 
 const MealPlan = () => {
+  const { recipes } = useRecipes();
+  const { user } = useAuth();
+  const [mealPlan, setMealPlan] = useState(getInitialPlan);
   const [currentWeek, setCurrentWeek] = useState('June 12 - June 18, 2025');
+  const [selecting, setSelecting] = useState({ dayIndex: null, mealType: null });
 
-  const weeklyStats = {
-    totalCalories: mealPlanData.reduce((sum, day) => sum + day.dailyTotal, 0),
-    dailyAverage: Math.round(mealPlanData.reduce((sum, day) => sum + day.dailyTotal, 0) / 7),
-    mealsPlanned: mealPlanData.reduce((count, day) => {
-      return count + (day.breakfast ? 1 : 0) + (day.lunch ? 1 : 0) + (day.dinner ? 1 : 0);
-    }, 0),
-    slotsAvailable: 21 - mealPlanData.reduce((count, day) => {
-      return count + (day.breakfast ? 1 : 0) + (day.lunch ? 1 : 0) + (day.dinner ? 1 : 0);
-    }, 0)
-  };
+  useEffect(() => {
+    localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
+  }, [mealPlan]);
 
   const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   const previousWeek = () => setCurrentWeek('June 5 - June 11, 2025');
   const nextWeek = () => setCurrentWeek('June 19 - June 25, 2025');
 
-  const handleAddMeal = (day, mealType) => {
-    console.log(`Adding ${mealType} for ${weekdays[day]}`);
+  const updateTotals = (plan, dayIndex) => {
+    plan[dayIndex].dailyTotal = ['breakfast', 'lunch', 'dinner'].reduce((sum, type) => {
+      return sum + (plan[dayIndex][type]?.calories || 0);
+    }, 0);
+  };
+
+  const handleSelectRecipe = (recipe) => {
+    const { dayIndex, mealType } = selecting;
+    const updated = mealPlan.map(day => ({ ...day }));
+    updated[dayIndex][mealType] = {
+      name: recipe.title,
+      image: recipe.image,
+      calories: recipe.calories
+    };
+    updateTotals(updated, dayIndex);
+    setMealPlan(updated);
+    setSelecting({ dayIndex: null, mealType: null });
+  };
+
+  const handleRemoveMeal = (dayIndex, mealType) => {
+    const updated = mealPlan.map(day => ({ ...day }));
+    updated[dayIndex][mealType] = null;
+    updateTotals(updated, dayIndex);
+    setMealPlan(updated);
+  };
+
+  const featured = recipes.filter(r => r.approved);
+  const myRecipes = user ? recipes.filter(r => r.createdBy === user.name) : [];
+
+  const weeklyStats = {
+    totalCalories: mealPlan.reduce((sum, day) => sum + day.dailyTotal, 0),
+    dailyAverage: Math.round(mealPlan.reduce((sum, day) => sum + day.dailyTotal, 0) / 7),
+    mealsPlanned: mealPlan.reduce((count, day) => {
+      return count + (day.breakfast ? 1 : 0) + (day.lunch ? 1 : 0) + (day.dinner ? 1 : 0);
+    }, 0),
+    slotsAvailable: 21 - mealPlan.reduce((count, day) => {
+      return count + (day.breakfast ? 1 : 0) + (day.lunch ? 1 : 0) + (day.dinner ? 1 : 0);
+    }, 0)
   };
 
   return (
@@ -55,16 +96,17 @@ const MealPlan = () => {
           {['breakfast', 'lunch', 'dinner'].map(mealType => (
             <>
               <div className="grid-header time-label">{mealType.charAt(0).toUpperCase() + mealType.slice(1)}</div>
-              {mealPlanData.map((day, index) => (
+              {mealPlan.map((day, index) => (
                 <div key={`${mealType}-${index}`} className="meal-cell">
                   {day[mealType] ? (
                     <div className="meal-content">
                       <img src={day[mealType].image} alt={day[mealType].name} className="meal-image" />
                       <div className="meal-name">{day[mealType].name}</div>
                       <div className="meal-calories">{day[mealType].calories} cal</div>
+                      <button className="btn btn-secondary btn-sm" onClick={() => handleRemoveMeal(index, mealType)} style={{ marginTop: '0.5rem' }}>Remove</button>
                     </div>
                   ) : (
-                    <div className="add-meal" onClick={() => handleAddMeal(index, mealType)}>
+                    <div className="add-meal" onClick={() => setSelecting({ dayIndex: index, mealType })}>
                       <span className="add-icon">+</span>
                       <span>Add {mealType.charAt(0).toUpperCase() + mealType.slice(1)}</span>
                     </div>
@@ -75,12 +117,29 @@ const MealPlan = () => {
           ))}
 
           <div className="grid-header time-label">Daily Total</div>
-          {mealPlanData.map((day, index) => (
+          {mealPlan.map((day, index) => (
             <div key={`total-${index}`} className="grid-header daily-total">
               {day.dailyTotal} cal
             </div>
           ))}
         </div>
+
+        {selecting.dayIndex !== null && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h3>Select a recipe</h3>
+              <p><strong>Featured:</strong></p>
+              {featured.map((r, i) => (
+                <button key={i} className="btn btn-secondary btn-sm" style={{ margin: '0.25rem' }} onClick={() => handleSelectRecipe(r)}>{r.title}</button>
+              ))}
+              <p><strong>My Recipes:</strong></p>
+              {myRecipes.map((r, i) => (
+                <button key={i} className="btn btn-secondary btn-sm" style={{ margin: '0.25rem' }} onClick={() => handleSelectRecipe(r)}>{r.title}</button>
+              ))}
+              <button onClick={() => setSelecting({ dayIndex: null, mealType: null })} className="btn btn-secondary btn-sm" style={{ marginTop: '1rem' }}>Cancel</button>
+            </div>
+          </div>
+        )}
 
         <div className="meal-summary">
           <div className="summary-card">
