@@ -125,20 +125,35 @@ const MealPlan = () => {
         </div>
 
         {selecting.dayIndex !== null && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h3>Select a recipe</h3>
-              <p><strong>Featured:</strong></p>
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Select a recipe</h3>
+
+            <h4>Featured Recipes</h4>
+            <div className="modal-section">
               {featured.map((r, i) => (
-                <button key={i} className="btn btn-secondary btn-sm" style={{ margin: '0.25rem' }} onClick={() => handleSelectRecipe(r)}>{r.title}</button>
+                <button key={`f-${i}`} onClick={() => handleSelectRecipe(r)} className="recipe-option">
+                  <img src={r.image} alt={r.title} className="thumb" />
+                  <span>{r.title}</span>
+                </button>
               ))}
-              <p><strong>My Recipes:</strong></p>
-              {myRecipes.map((r, i) => (
-                <button key={i} className="btn btn-secondary btn-sm" style={{ margin: '0.25rem' }} onClick={() => handleSelectRecipe(r)}>{r.title}</button>
-              ))}
-              <button onClick={() => setSelecting({ dayIndex: null, mealType: null })} className="btn btn-secondary btn-sm" style={{ marginTop: '1rem' }}>Cancel</button>
             </div>
+
+            <h4>My Recipes</h4>
+            <div className="modal-section">
+              {myRecipes.map((r, i) => (
+                <button key={`m-${i}`} onClick={() => handleSelectRecipe(r)} className="recipe-option">
+                  <img src={r.image} alt={r.title} className="thumb" />
+                  <span>{r.title}</span>
+                </button>
+              ))}
+            </div>
+
+            <button onClick={() => setSelecting({ dayIndex: null, mealType: null })} className="btn btn-secondary btn-sm">
+              Cancel
+            </button>
           </div>
+        </div>
         )}
 
         <div className="meal-summary">
